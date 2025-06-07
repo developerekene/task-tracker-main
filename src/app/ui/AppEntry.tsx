@@ -1,11 +1,12 @@
 import React from 'react';
-import HomePage from './pages/HomePage/HomePage';
+import { BrowserRouter } from 'react-router-dom';
+import Index from './Routes/Index';
 
 const AppEntry: React.FunctionComponent = () => {
     return (
-        <div>
-            <HomePage />
-        </div>
+        <BrowserRouter>
+            <Index />
+        </BrowserRouter>
     )
 }
 

@@ -1,6 +1,8 @@
 import { motion, useAnimation } from "framer-motion";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
+import { Navigate, useNavigate } from "react-router-dom";
+import { RoutePath } from "../../Routes/Index";
 import "./HomePage.css"
 
 const HomePage: React.FC = () => {
@@ -22,6 +24,8 @@ const HomePage: React.FC = () => {
         threshold: 0.1,
         triggerOnce: true,
     });
+
+    const navigate = useNavigate();
 
     // Hero section animations
     const heroVariants = {
@@ -142,7 +146,7 @@ const HomePage: React.FC = () => {
                                 A Smart, Intuitive Task Tracker Built with React and Firebase for Seamless Task Management, Real-Time Sync, User Authentication, and Productivity Insights
                             </motion.p>
                             <motion.div className="hero-cta" variants={heroItemVariants}>
-                                <button className="cta-primary">Join for Free</button>
+                                <button onClick={() => navigate(RoutePath.Register)} className="cta-primary">Join for Free</button>
                                 <button style={{ color: "white" }} className="cta-secondary">Learn More</button>
                             </motion.div>
                             {/* <motion.div className="hero-tagline" variants={heroItemVariants}>
