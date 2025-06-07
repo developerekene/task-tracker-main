@@ -11,6 +11,7 @@ import { FaTachometerAlt, FaTasks, FaUser, FaCalendarAlt, FaCog, FaSignOutAlt } 
 import { authService } from '../../../redux/configuration/auth.service';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../Routes/Index';
+import Notifications from './Notifications';
 
 
 const DashboardWrapper = styled.div`
@@ -108,6 +109,8 @@ const Dashboard: React.FC<{ user: { firstName: string; lastName: string } }> = (
         return <UserProfile />;
       case 'Calendar':
         return <CalendarView />;
+      case 'Notifications':
+        return <Notifications />;
       case 'Settings':
         return <Settings />;
       default:
@@ -140,11 +143,13 @@ const Dashboard: React.FC<{ user: { firstName: string; lastName: string } }> = (
                 // @ts-ignore
                 { label: 'Dashboard', icon: <FaTachometerAlt />, key: 'Dashboard' },
                 // @ts-ignore
+                { label: 'Profile', icon: <FaUser />, key: 'Profile' },
+                // @ts-ignore
+                { label: 'Notifications', icon: <FaUser />, key: 'Notifications' },
+                // @ts-ignore
                 { label: 'Tasks', icon: <FaTasks />, key: 'Tasks' },
                 // @ts-ignore
                 { label: 'Calendar', icon: <FaCalendarAlt />, key: 'Calendar' },
-                // @ts-ignore
-                { label: 'Profile', icon: <FaUser />, key: 'Profile' },
                 // @ts-ignore
                 { label: 'Settings', icon: <FaCog />, key: 'Settings' },
               ].map(item => (
