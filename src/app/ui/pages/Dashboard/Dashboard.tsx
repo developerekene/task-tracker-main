@@ -8,6 +8,9 @@ import CalendarView from './CalendarView';
 import UserProfile from './UserProfile';
 import TaskList from './TaskList';
 import { FaTachometerAlt, FaTasks, FaUser, FaCalendarAlt, FaCog, FaSignOutAlt } from 'react-icons/fa';
+import { authService } from '../../../redux/configuration/auth.service';
+import { useNavigate } from 'react-router-dom';
+import { RoutePath } from '../../Routes/Index';
 
 
 const DashboardWrapper = styled.div`
@@ -87,6 +90,13 @@ const Dashboard: React.FC<{ user: { firstName: string; lastName: string } }> = (
   const [selectedItem, setSelectedItem] = useState('Dashboard');
 
   const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+  const navigate = useNavigate()
+
+  const handleSignOut = async () => {
+    await authService.handleUserSignout()
+      .then(() => navigate(RoutePath.Login))
+      .catch((err) => console.error(err));
+  };
 
   const renderSelectedComponent = () => {
     switch (selectedItem) {
@@ -153,7 +163,7 @@ const Dashboard: React.FC<{ user: { firstName: string; lastName: string } }> = (
               ))}
 
               <MenuItem
-                // onClick={handleLogout}
+                onClick={handleSignOut}
                 style={{ color: '#f44336', marginTop: 'auto' }}
               >
                 {/* @ts-ignore */}

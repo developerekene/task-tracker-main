@@ -6,6 +6,7 @@ import { RootState } from '../../redux/store';
 import { useSelector } from 'react-redux';
 import Login from '../pages/LoginPage/LoginPage';
 import Register from '../pages/Register/Register';
+import ForgotPassword from '../pages/ForgotPassword/ForgotPassword';
 
 export enum RoutePath {
     Home = "/",
@@ -22,10 +23,11 @@ const Index: React.FunctionComponent = () => {
         <Routes>
             <Route
                 path={RoutePath.Home}
-                element={user ? <Navigate to={RoutePath.Dashboard} replace /> : <HomePage />}
+                element={user.firstName !== "" ? <Navigate to={RoutePath.Dashboard} replace /> : <HomePage />}
             />
             <Route path={RoutePath.Register} element={<Register />} />
             <Route path={RoutePath.Login} element={<Login />} />
+            <Route path={RoutePath.ForgotPassword} element={<ForgotPassword />} />
             <Route path={RoutePath.Dashboard} element={<Dashboard user={{
                 firstName: user.firstName,
                 lastName: user.lastName

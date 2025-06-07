@@ -3,12 +3,13 @@ import React, { useState, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import styled from '@emotion/styled';
-import { FaSignInAlt } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { FaUnlockAlt } from 'react-icons/fa';
 
 import { authService } from '../../../redux/configuration/auth.service';
 import { RoutePath } from '../../Routes/Index';
 
+// Reuse styled components from Login
 const Container = styled.div`
     display: grid;
     grid-template-columns: 1fr 1.5fr;
@@ -126,62 +127,12 @@ const SubmitButton = styled(motion.button)`
     margin-top: 10px;
 `;
 
-const Login: React.FC = () => {
-    const [formData, setFormData] = useState({ email: '', password: '' });
-    const [showPassword, setShowPassword] = useState(false);
+const ForgotPassword: React.FC = () => {
+    const [email, setEmail] = useState('');
     const [error, setError] = useState<string>('');
-    const [textBtn, setTextBtn] = useState<string>('Login');
+    const [textBtn, setTextBtn] = useState<string>('Reset Password');
 
     const navigate = useNavigate();
-
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const startCountdown = (seconds: number, onTick: (value: number) => void): Promise<void> => {
-        return new Promise((resolve) => {
-            let count = seconds;
-
-            const interval = setInterval(() => {
-                onTick(count);
-                if (count <= 0) {
-                    clearInterval(interval);
-                    resolve();
-                }
-                count--;
-            }, 1000);
-        });
-    }
-
-    const handleLogin = async () => {
-        const { email, password } = formData;
-        if (!email || !password) {
-            setError('Both email and password are required.');
-            return;
-        }
-        setTextBtn("Fetching your Information...")
-
-        try {
-            await authService.handleUserLogin(formData.email, formData.password);
-            toast.success('Login successful', {
-                style: { background: "#4BB543", color: "#fff" },
-            });
-            await startCountdown(5, (value) => {
-                setTextBtn(`Fetch Successful, Redirecting In ${value}`);
-            }).then(() => {
-                navigate(RoutePath.Dashboard)
-            });
-
-        } catch (err: unknown) {
-            setTextBtn("Login")
-            const message = err instanceof Error ? err.message : 'Login failed.';
-            setError(message);
-            toast.error(message, {
-                style: { background: "#ff4d4f", color: "#fff" },
-            });
-        }
-    };
 
     const containerVariants = {
         hidden: { opacity: 0, y: 30 },
@@ -197,19 +148,50 @@ const Login: React.FC = () => {
         visible: { opacity: 1, y: 0 },
     };
 
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setEmail(e.target.value);
+    };
+
+    const handleReset = async () => {
+        if (!email) {
+            setError('Email is required.');
+            return;
+        }
+
+        setTextBtn('Processing...');
+        setError('');
+
+        try {
+            await authService.handlePasswordReset(email).then(() => {
+                toast.success('Password reset link sent!', {
+                    style: { background: '#4BB543', color: '#fff' },
+                });
+                navigate(RoutePath.Login)
+            })
+
+        } catch (err: any) {
+            const message = err instanceof Error ? err.message : 'Something went wrong.';
+            setError(message);
+            toast.error(message, {
+                style: { background: '#ff4d4f', color: '#fff' },
+            });
+        } finally {
+            setTextBtn('Reset Password');
+        }
+    };
+
     return (
         <Container>
             <Left>
-                <BackButton onClick={() => navigate('/')}>← Back to Home</BackButton>
+                <BackButton onClick={() => navigate(RoutePath.Home)}>← Back to Home</BackButton>
                 <IconContainer>
                     {/* @ts-ignore */}
-                    <FaSignInAlt color="#4a90e2" />
+                    <FaUnlockAlt color="#4a90e2" />
                 </IconContainer>
                 <Credit
                     href="https://www.linkedin.com/in/ekenedilichukwu-okoli"
                     target="_blank"
                     rel="noopener noreferrer"
-                    css={{ display: 'block', '@media(max-width: 768px)': { display: 'none' } }}
                 >
                     <p>&copy; 2025 built by Ekenedilichukwu Okoli</p>
                 </Credit>
@@ -221,64 +203,16 @@ const Login: React.FC = () => {
                         variants={inputVariants}
                         style={{ textAlign: 'center', marginBottom: '20px', fontSize: '2rem' }}
                     >
-                        Welcome Back
+                        Reset Password
                     </motion.h2>
 
-                    <div css={{ position: 'relative', marginBottom: '15px' }}>
-                        <Input
-                            name="email"
-                            placeholder="Email"
-                            type="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            variants={inputVariants}
-                        />
-                    </div>
-
-                    <div css={{ position: 'relative', marginBottom: '10px' }}>
-                        <Input
-                            name="password"
-                            placeholder="Password"
-                            type={showPassword ? 'text' : 'password'}
-                            value={formData.password}
-                            onChange={handleChange}
-                            variants={inputVariants}
-                            css={{ paddingRight: '40px' }}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(prev => !prev)}
-                            css={{
-                                position: 'absolute',
-                                top: '50%',
-                                right: '12px',
-                                transform: 'translateY(-50%)',
-                                background: 'none',
-                                border: 'none',
-                                color: '#aaa',
-                                cursor: 'pointer',
-                                fontSize: '0.9rem',
-                                userSelect: 'none',
-                            }}
-                        >
-                            {showPassword ? 'Hide' : 'Show'}
-                        </button>
-                    </div>
-
-                    {/* Forgot Password Link */}
-                    <motion.p
+                    <Input
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={handleChange}
                         variants={inputVariants}
-                        style={{
-                            textAlign: 'right',
-                            marginBottom: '20px',
-                            fontSize: '0.85rem',
-                            color: '#4a90e2',
-                            cursor: 'pointer',
-                        }}
-                        onClick={() => navigate(RoutePath.ForgotPassword)}
-                    >
-                        Forgot Password?
-                    </motion.p>
+                    />
 
                     {error && (
                         <motion.p
@@ -290,7 +224,7 @@ const Login: React.FC = () => {
                     )}
 
                     <SubmitButton
-                        onClick={handleLogin}
+                        onClick={handleReset}
                         variants={inputVariants}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -302,15 +236,16 @@ const Login: React.FC = () => {
                         variants={inputVariants}
                         style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.9rem' }}
                     >
-                        Don't have an account?{' '}
+                        Remembered your password?{' '}
                         <span
                             style={{ color: '#4a90e2', cursor: 'pointer' }}
-                            onClick={() => navigate(RoutePath.Register)}
+                            onClick={() => navigate(RoutePath.Login)}
                         >
-                            Register
+                            Go to Login
                         </span>
                     </motion.p>
                 </FormWrapper>
+
                 <CreditMobile
                     href="https://www.linkedin.com/in/ekenedilichukwu-okoli"
                     target="_blank"
@@ -323,4 +258,4 @@ const Login: React.FC = () => {
     );
 };
 
-export default Login;
+export default ForgotPassword;

@@ -138,6 +138,7 @@ const Register: React.FC = () => {
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [textBtn, setTextBtn] = useState<string>('Register');
 
     const [error, setError] = useState<string>('');
     const navigate = useNavigate();
@@ -164,15 +165,31 @@ const Register: React.FC = () => {
         return null;
     };
 
+    const startCountdown = (seconds: number, onTick: (value: number) => void): Promise<void> => {
+        return new Promise((resolve) => {
+            let count = seconds;
+
+            const interval = setInterval(() => {
+                onTick(count);
+                if (count <= 0) {
+                    clearInterval(interval);
+                    resolve();
+                }
+                count--;
+            }, 1000);
+        });
+    }
+
     const handleRegister = async (): Promise<void> => {
         const validationError = validateForm();
         if (validationError) {
             setError(validationError);
             return;
         }
+        setTextBtn("Registering your Information");
 
         try {
-            await authService.handleUserRegistration(formData).then(() => {
+            await authService.handleUserRegistration(formData).then(async () => {
                 setFormData({
                     firstName: '',
                     lastName: '',
@@ -183,11 +200,14 @@ const Register: React.FC = () => {
                 toast.success("User created", {
                     style: { background: "#4BB543", color: "#fff" },
                 });
-                setTimeout(() => {
+                await startCountdown(5, (value) => {
+                    setTextBtn(`User Created, Redirecting In ${value}`);
+                }).then(() => {
                     navigate(RoutePath.Dashboard)
-                }, 5000)
+                });
             })
         } catch (err: unknown) {
+            setTextBtn(`Register`);
             toast.error(err instanceof Error ? err.message : 'An unknown error occurred.', {
                 style: { background: "#ff4d4f", color: "#fff" },
             });
@@ -306,7 +326,7 @@ const Register: React.FC = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                     >
-                        Register
+                        {textBtn}
                     </SubmitButton>
 
                     <motion.p
@@ -316,7 +336,7 @@ const Register: React.FC = () => {
                         Already have an account?{" "}
                         <span
                             style={{ color: '#4a90e2', cursor: 'pointer' }}
-                            onClick={() => navigate('/login')}
+                            onClick={() => navigate(RoutePath.Login)}
                         >
                             Login
                         </span>

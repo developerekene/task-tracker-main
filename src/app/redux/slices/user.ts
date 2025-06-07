@@ -8,7 +8,31 @@ export interface UserState {
     password: string;
     confirmPassword: string;
     isLoggedIn: boolean;
+    initials: string;
+    uniqueId: string;
+    agreedToTerms: string;
+    middleName: string;
+    phone: string;
+    gender: string;
+    dateOfBirth: string;
+    disability: boolean;
+    disabilityType: string;
+    photoUrl: string;
+    educationalLevel: string;
+    referralName: string;
+    secondaryEmail: string;
+    securityQuestion: string;
+    securityAnswer: string;
+    verifiedEmail: boolean;
+    verifyPhoneNumber: boolean;
+    twoFactorSettings: boolean;
+    streetNumber: string;
+    streetName: string;
+    city: string;
+    state: string;
+    country: string;
 }
+
 
 // 🔁 Load user from localStorage if available
 const loadFromLocalStorage = (): UserState => {
@@ -19,7 +43,30 @@ const loadFromLocalStorage = (): UserState => {
         email: '',
         password: '',
         confirmPassword: '',
-        isLoggedIn: false
+        isLoggedIn: false,
+        initials: "",
+        uniqueId: "",
+        agreedToTerms: "",
+        middleName: "",
+        phone: "",
+        gender: "",
+        dateOfBirth: "",
+        disability: false,
+        disabilityType: "",
+        photoUrl: "",
+        educationalLevel: "",
+        referralName: "",
+        secondaryEmail: "",
+        securityQuestion: "",
+        securityAnswer: "",
+        verifiedEmail: false,
+        verifyPhoneNumber: false,
+        twoFactorSettings: false,
+        streetNumber: "",
+        streetName: "",
+        city: "",
+        state: "",
+        country: "",
     };
 };
 
@@ -43,6 +90,29 @@ export const userSlice = createSlice({
                 password: '',
                 confirmPassword: '',
                 isLoggedIn: false,
+                initials: "",
+                uniqueId: "",
+                agreedToTerms: "",
+                middleName: "",
+                phone: "",
+                gender: "",
+                dateOfBirth: "",
+                disability: false,
+                disabilityType: "",
+                photoUrl: "",
+                educationalLevel: "",
+                referralName: "",
+                secondaryEmail: "",
+                securityQuestion: "",
+                securityAnswer: "",
+                verifiedEmail: false,
+                verifyPhoneNumber: false,
+                twoFactorSettings: false,
+                streetNumber: "",
+                streetName: "",
+                city: "",
+                state: "",
+                country: "",
             };
         },
     },

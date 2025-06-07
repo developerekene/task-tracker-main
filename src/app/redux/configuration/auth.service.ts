@@ -1,9 +1,9 @@
-import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
 import { auth, db } from "../../../firbase-config";
 import { RegisterFormData } from "../../utils/Types";
-import { setUserData } from "../slices/user";
+import { resetUserData, setUserData } from "../slices/user";
 import { store } from "../store";
 
 const getCurrentDateTime = () => {
@@ -66,7 +66,6 @@ export class AuthService {
                     verifiedEmail: false,
                     verifyPhoneNumber: false,
                     twoFactorSettings: false,
-                    role: "",
                     streetNumber: "",
                     streetName: "",
                     city: "",
@@ -87,7 +86,7 @@ export class AuthService {
             const fetchedUserData = userSnapshot.data();
             const primaryInformation = fetchedUserData.user.primaryInformation;
 
-            store.dispatch(setUserData({ ...primaryInformation, role: fetchedUserData.user.primaryInformation.role }));
+            store.dispatch(setUserData(primaryInformation));
 
             // ✅ Send email only after DB is confirmed written
             await sendEmailVerification(user);
@@ -103,9 +102,79 @@ export class AuthService {
 
         return registerUser
     }
+
     async handleUserLogin(email: string, password: string) {
-        const registerUser = await signInWithEmailAndPassword(auth, email, password);
-        const user = registerUser.user;
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const userDocRef = doc(collection(db, "database"), userCredential.user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (userDocSnap.exists()) {
+                const updatedData = userDocSnap.data();
+                console.log(updatedData);
+                const primaryInformation = updatedData?.user?.primaryInformation;
+                const locationInformation = updatedData?.user?.location;
+
+                store.dispatch(setUserData(primaryInformation));
+
+                toast.success(`We have successfully logged you into your account.`, {
+                    style: {
+                        background: '#4BB543',
+                        color: '#fff',
+                    },
+                });
+            } else {
+                throw new Error("User information does not exist in database.");
+            }
+
+
+        } catch (err: any) {
+            toast.error(err.message || "Login failed", {
+                style: {
+                    background: '#ff4d4f',
+                    color: '#fff',
+                },
+            });
+            throw err;
+        }
+    }
+
+    async handleUserSignout(): Promise<void> {
+        await signOut(auth).then(() => {
+            store.dispatch(resetUserData());
+            toast.success(`You have successfully signed out of your Account`, {
+                style: {
+                    background: '#4BB543',
+                    color: '#fff',
+                },
+            })
+        }).catch((err) => {
+            toast.error(`Error creating your Account - ${err.message}`, {
+                style: {
+                    background: '#ff4d4f',
+                    color: '#fff',
+                },
+            })
+        })
+    }
+
+    async handlePasswordReset(email: string): Promise<void> {
+        // Sending password reset email
+        await sendPasswordResetEmail(auth, email).then(() => {
+            toast.success(`Password reset email sent to: ${email}. Please check your inbox.`, {
+                style: {
+                    background: '#4BB543',
+                    color: '#fff',
+                },
+            });
+        }).catch((error: any) => {
+            toast.error(`${error.message}`, {
+                style: {
+                    background: '#ff4d4f',
+                    color: '#fff',
+                },
+            });
+        });
     }
 }
 
