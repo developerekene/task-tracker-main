@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Task } from '../../../redux/slices/task';
+import { RootState } from '../../../redux/store';
 
-interface Task {
-    id: number;
-    title: string;
-    progress: number; // 0-100%
-    description: string;
-    status: string;
-}
+
 
 interface Notification {
     id: number;
@@ -15,14 +12,6 @@ interface Notification {
     date: string;
 }
 
-const mockTasks: Task[] = [
-    { id: 1, title: 'Task One', description: 'Description for task one', progress: 20, status: 'priority' },
-    { id: 2, title: 'Task Two', description: 'Description for task two', progress: 50, status: 'in-progress' },
-    { id: 3, title: 'Task Three', description: 'Description for task three', progress: 100, status: 'completed' },
-    { id: 4, title: 'Task Four', description: 'Description for task four', progress: 75, status: 'pending' },
-    { id: 5, title: 'Task Five', description: 'Description for task five', progress: 30, status: 'overdue' },
-    { id: 6, title: 'Task Six', description: 'Description for task six', progress: 60, status: 'in-progress' },
-];
 
 const mockNotifications: Notification[] = [
     { id: 1, message: 'Task One created', type: 'created', date: '2025-06-06' },
@@ -57,6 +46,7 @@ const monthNames = [
 const DashboardOverview: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [columns, setColumns] = useState('repeat(auto-fit, minmax(300px, 1fr))');
+    const tasks: Task[] = useSelector((state: RootState) => state.tasks)
 
     useEffect(() => {
         const updateColumns = () => {
@@ -74,13 +64,14 @@ const DashboardOverview: React.FC = () => {
         return () => window.removeEventListener('resize', updateColumns);
     }, []);
 
-    const filteredTasks = mockTasks.filter(task =>
+    const filteredTasks = tasks.filter((task: Task) =>
         task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.description.toLowerCase().includes(searchTerm.toLowerCase())
+        task.desc.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const filteredNotifications = mockNotifications.filter(note =>
-        note.message.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredNotifications = tasks.filter((task: Task) =>
+        task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.desc.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const filteredCalendarDays = calendarDays.map((day) => {
@@ -122,12 +113,10 @@ const DashboardOverview: React.FC = () => {
             >
                 {/* Tasks Card */}
                 <div
-                    onClick={() => handleCardClick('Tasks')}
                     style={{
                         backgroundColor: '#ff9800',
                         borderRadius: '12px',
                         padding: '20px',
-                        cursor: 'pointer',
                         boxShadow: '0 4px 15px rgb(255 152 0 / 0.5)',
                         transition: 'transform 0.2s ease',
                         display: 'flex',
@@ -153,7 +142,7 @@ const DashboardOverview: React.FC = () => {
                         }}
                     >
                         {filteredTasks.slice(0, 5).length === 0 ? (
-                            <div style={{ color: '#fff' }}>No tasks match your search.</div>
+                            <div style={{ color: '#fff' }}>No tasks found.</div>
                         ) : (
                             filteredTasks.slice(0, 5).map(task => (
                                 <div
@@ -168,7 +157,7 @@ const DashboardOverview: React.FC = () => {
                                     }}
                                 >
                                     <h3 style={{ margin: '0 0 10px' }}>{task.title}</h3>
-                                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#ccc' }}>{task.description}</p>
+                                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#ccc' }}>{task.desc}</p>
                                 </div>
                             ))
                         )}
@@ -177,12 +166,10 @@ const DashboardOverview: React.FC = () => {
 
                 {/* Notifications Card */}
                 <div
-                    onClick={() => handleCardClick('Notifications')}
                     style={{
                         backgroundColor: '#2196f3',
                         borderRadius: '12px',
                         padding: '20px',
-                        cursor: 'pointer',
                         boxShadow: '0 4px 15px rgb(33 150 243 / 0.5)',
                         transition: 'transform 0.2s ease',
                         display: 'flex',
@@ -221,18 +208,11 @@ const DashboardOverview: React.FC = () => {
                                         scrollbarWidth: 'none', /* Firefox */
                                         msOverflowStyle: 'none', /* IE and Edge */
                                         boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
-                                        color:
-                                            note.type === 'deleted'
-                                                ? '#ef9a9a'
-                                                : note.type === 'created'
-                                                    ? '#a5d6a7'
-                                                    : note.type === 'updated'
-                                                        ? '#90caf9'
-                                                        : '#fff59d',
+                                        color: "#ffffff"
                                     }}
                                 >
-                                    <p style={{ margin: 0, fontWeight: '600' }}>{note.message}</p>
-                                    <small style={{ color: '#bbdefb' }}>{note.date}</small>
+                                    <p style={{ margin: 0, fontWeight: '600' }}>{note.desc}</p>
+                                    <small style={{ color: '#bbdefb' }}>{note.dateCreated}</small>
                                 </div>
                             ))
                         )}
@@ -241,12 +221,10 @@ const DashboardOverview: React.FC = () => {
 
                 {/* Task Progress */}
                 <div
-                    onClick={() => handleCardClick('Task Progress')}
                     style={{
                         backgroundColor: '#4caf50',
                         borderRadius: '12px',
                         padding: '20px',
-                        cursor: 'pointer',
                         boxShadow: '0 4px 15px rgb(76 175 80 / 0.5)',
                         transition: 'transform 0.2s ease',
                         display: 'flex',
@@ -274,14 +252,14 @@ const DashboardOverview: React.FC = () => {
                                     overflow: 'hidden',
                                 }}
                             >
-                                <div
+                                {/* <div
                                     style={{
                                         width: `${task.progress}%`,
                                         height: '100%',
                                         backgroundColor: '#c8e6c9',
                                         transition: 'width 0.3s ease',
                                     }}
-                                />
+                                /> */}
                             </div>
                         </div>
                     ))}

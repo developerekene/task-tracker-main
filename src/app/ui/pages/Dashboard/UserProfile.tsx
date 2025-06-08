@@ -69,7 +69,7 @@ const UserProfile = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setEditedUser(prev => ({
+        setEditedUser((prev: any) => ({
             ...prev,
             [name]: value,
         }));

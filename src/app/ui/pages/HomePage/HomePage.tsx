@@ -137,7 +137,7 @@ const HomePage: React.FC = () => {
                     <div className="hero-grid">
                         <motion.div className="hero-content" variants={heroVariants}>
                             <motion.h1 variants={heroItemVariants}>
-                                Task Mate
+                                Task Tracker
                             </motion.h1>
                             <motion.h3 style={{ color: "grey", marginBottom: 20 }} variants={heroItemVariants}>
                                 Be confident while you are on the Go.
@@ -147,7 +147,7 @@ const HomePage: React.FC = () => {
                             </motion.p>
                             <motion.div className="hero-cta" variants={heroItemVariants}>
                                 <button onClick={() => navigate(RoutePath.Register)} className="cta-primary">Join for Free</button>
-                                <button style={{ color: "white" }} className="cta-secondary">Learn More</button>
+                                {/* <button style={{ color: "white" }} className="cta-secondary">Learn More</button> */}
                             </motion.div>
                             {/* <motion.div className="hero-tagline" variants={heroItemVariants}>
                                 <p>Be bold. Be fast. Be D'roid.</p>
@@ -186,10 +186,9 @@ const HomePage: React.FC = () => {
                                     <path d="M12,16.5C9.5,16.5 7.5,14.5 7.5,12C7.5,9.5 9.5,7.5 12,7.5C14.5,7.5 16.5,9.5 16.5,12C16.5,14.5 14.5,16.5 12,16.5M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,19H5V5H19V19Z" />
                                 </svg>
                             </div>
-                            <h3>Pro-Grade Camera</h3>
+                            <h3>Create Tasks</h3>
                             <p>
-                                108MP quad camera system with night vision and AI-powered
-                                photography
+                                Easily add and manage tasks to keep your day organized.
                             </p>
                         </motion.div>
 
@@ -199,8 +198,8 @@ const HomePage: React.FC = () => {
                                     <path d="M3,15V9H5V15H3M19,9V15H21V9H19M1,19H23V21H1V19M7,11V13H17V11H7M11,3H13V5H11V3M7,5H9V3H7V5M15,3H17V5H15V3M1,5V7H3V5H1M21,5V7H23V5H21M1,15H3V17H1V15M21,15H23V17H21V15Z" />
                                 </svg>
                             </div>
-                            <h3>120Hz AMOLED Display</h3>
-                            <p>6.7" edge-to-edge display with HDR10+ and 1B colors</p>
+                            <h3>Schedule Deadlines</h3>
+                            <p>Set deadlines and milestones to stay on track.</p>
                         </motion.div>
 
                         <motion.div className="feature-card" variants={featureCardVariants}>
@@ -209,8 +208,8 @@ const HomePage: React.FC = () => {
                                     <path d="M12.3,8.93L9.88,6.5H15.5V10H17.5V4H9.88L12.3,1.57L10.92,0.15L6.42,4.65L5.7,5.35L5,6.05L10.92,12L12.3,10.6L9.88,8.17H15.5A3.5,3.5 0 0,1 19,11.67V17.5H17V11.67A1.5,1.5 0 0,0 15.5,10.17H9.88L12.3,8.93M19,19A1,1 0 0,1 18,20A1,1 0 0,1 17,19V18A1,1 0 0,1 18,17A1,1 0 0,1 19,18V19Z" />
                                 </svg>
                             </div>
-                            <h3>Next-Gen Processor</h3>
-                            <p>D'roid X1 chip with 5nm architecture and AI acceleration</p>
+                            <h3>Collaborate</h3>
+                            <p>Work together with your team in real time.</p>
                         </motion.div>
 
                         <motion.div className="feature-card" variants={featureCardVariants}>
@@ -219,66 +218,12 @@ const HomePage: React.FC = () => {
                                     <path d="M12,20A6,6 0 0,1 6,14C6,10 12,3.25 12,3.25C12,3.25 18,10 18,14A6,6 0 0,1 12,20Z" />
                                 </svg>
                             </div>
-                            <h3>All-Day Battery</h3>
+                            <h3>Reminders</h3>
                             <p>
-                                5000mAh battery with 65W fast charging and wireless power share
+                                Get notified about what matters most.
                             </p>
                         </motion.div>
                     </motion.div>
-                </div>
-            </motion.section>
-
-            {/* Specs Section */}
-            <motion.section
-                className="specs-section"
-                ref={specsRef}
-                initial="hidden"
-                animate={specsInView ? "visible" : "hidden"}
-                variants={specsVariants}
-            >
-                <div className="container">
-                    <div className="specs-grid">
-                        <motion.div className="specs-image" variants={specsImageVariants}>
-                            {/* <img src={Assets.images.phone_Two} alt="D'roid Specifications" /> */}
-                        </motion.div>
-                        <motion.div className="specs-content" variants={specsVariants}>
-                            <h2 className="section-title">Technical Specifications</h2>
-                            <motion.div className="specs-list" variants={specsVariants}>
-                                <motion.div className="spec-item" variants={specsItemVariants}>
-                                    <span className="spec-name">Display:</span>
-                                    <span className="spec-value">
-                                        6.7" Dynamic AMOLED 2X, 120Hz
-                                    </span>
-                                </motion.div>
-                                <motion.div className="spec-item" variants={specsItemVariants}>
-                                    <span className="spec-name">Processor:</span>
-                                    <span className="spec-value">D'roid X1 Octa-core (5nm)</span>
-                                </motion.div>
-                                <motion.div className="spec-item" variants={specsItemVariants}>
-                                    <span className="spec-name">Memory:</span>
-                                    <span className="spec-value">
-                                        12GB RAM + 256GB/512GB storage
-                                    </span>
-                                </motion.div>
-                                <motion.div className="spec-item" variants={specsItemVariants}>
-                                    <span className="spec-name">Camera:</span>
-                                    <span className="spec-value">
-                                        108MP + 12MP + 8MP + 5MP quad rear, 32MP front
-                                    </span>
-                                </motion.div>
-                                <motion.div className="spec-item" variants={specsItemVariants}>
-                                    <span className="spec-name">Battery:</span>
-                                    <span className="spec-value">
-                                        5000mAh with 65W fast charging
-                                    </span>
-                                </motion.div>
-                                <motion.div className="spec-item" variants={specsItemVariants}>
-                                    <span className="spec-name">OS:</span>
-                                    <span className="spec-value">DroidOS 3.0 (Android 13)</span>
-                                </motion.div>
-                            </motion.div>
-                        </motion.div>
-                    </div>
                 </div>
             </motion.section>
 
@@ -320,17 +265,6 @@ const HomePage: React.FC = () => {
                     </motion.div>
                 </div>
             </motion.section>
-
-            {/* CTA Section */}
-            <section className="cta-section">
-                <div className="container">
-                    <div className="cta-content">
-                        <h2>Ready to Experience D'roid?</h2>
-                        <p>Join the next generation of mobile technology today.</p>
-                        <button className="cta-primary">Order Now</button>
-                    </div>
-                </div>
-            </section>
         </div>
     );
 };

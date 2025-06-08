@@ -1,8 +1,9 @@
 import { createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
-import { collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion } from "firebase/firestore";
 import toast from "react-hot-toast";
 import { auth, db } from "../../../firbase-config";
 import { RegisterFormData } from "../../utils/Types";
+import { setTasks, Task } from "../slices/task";
 import { resetUserData, setUserData } from "../slices/user";
 import { store } from "../store";
 
@@ -76,6 +77,15 @@ export class AuthService {
                     // locationFromDevice: locationData,
                     currentdateTime: currentDateTime,
                 },
+                task: {
+                    tasks: []
+                },
+                notification: {
+                    notifications: []
+                },
+                settings: {
+                    language: ""
+                }
             },
         };
 
@@ -114,7 +124,12 @@ export class AuthService {
                 console.log(updatedData);
                 const primaryInformation = updatedData?.user?.primaryInformation;
                 const locationInformation = updatedData?.user?.location;
+                const taskInformation = updatedData?.user?.task?.tasks;
+                const notificationInformation = updatedData?.user?.notification.notifications;
+                const settingsInformation = updatedData?.user?.settings;
 
+                // Dispatching to the store
+                store.dispatch(setTasks(taskInformation));
                 store.dispatch(setUserData(primaryInformation));
 
                 toast.success(`We have successfully logged you into your account.`, {
@@ -176,6 +191,108 @@ export class AuthService {
             });
         });
     }
+
+    async handleGetTasks(userId: string) {
+        const snapshot = await getDocs(collection(db, 'users', userId, 'tasks'));
+
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                title: data.title || '',   // Provide fallback if needed
+                desc: data.desc || '',
+                dateCreated: data.dateCreated || '',
+                dateModified: data.dateModified || '',
+                dateDeleted: data.dateDeleted || '',
+                completed: data.completed ?? false,
+            };
+        });
+    };
+
+    async handleCreateTask(userId: string, task: Task) {
+        const userDocRef = doc(db, 'database', userId);
+
+        // Add the new task atomically to the tasks array inside user.task.tasks
+        await updateDoc(userDocRef, {
+            'user.task.tasks': arrayUnion({
+                id: task.id,
+                title: task.title,
+                desc: task.desc,
+                dateCreated: task.dateCreated,
+                dateModified: task.dateModified,
+                dateDeleted: task.dateDeleted || null,
+                completed: task.completed ?? false,
+            }),
+        });
+
+        // Fetch the updated user document with tasks
+        const updatedUserDoc = await getDoc(userDocRef);
+        if (!updatedUserDoc.exists()) {
+            throw new Error('User document not found');
+        }
+
+        // Extract the tasks array from user.task.tasks
+        const updatedTasks: Task[] = updatedUserDoc.data()?.user?.task?.tasks ?? [];
+
+        // Dispatch to Redux store to update task slice
+        store.dispatch(setTasks(updatedTasks));
+    }
+
+
+    async handleUpdateTask(userId: string, taskId: string, updates: Partial<Task>) {
+        const userDocRef = doc(db, 'database', userId);
+
+        // Get the current user doc data
+        const userDoc = await getDoc(userDocRef);
+        if (!userDoc.exists()) {
+            throw new Error('User document not found');
+        }
+
+        // Extract current tasks array
+        const tasks: Task[] = userDoc.data()?.user?.task?.tasks ?? [];
+
+        // Update the target task in the array
+        const updatedTasks = tasks.map(task => {
+            if (task.id === taskId) {
+                return { ...task, ...updates, dateModified: new Date().toISOString() };
+            }
+            return task;
+        });
+
+        // Write the updated tasks array back to Firestore
+        await updateDoc(userDocRef, {
+            'user.task.tasks': updatedTasks,
+        });
+
+        // Dispatch the updated tasks array to Redux
+        store.dispatch(setTasks(updatedTasks));
+    }
+
+    async handleDeleteTask(userId: string, taskId: string) {
+        const userDocRef = doc(db, 'database', userId);
+
+        // Fetch the current user document
+        const userDoc = await getDoc(userDocRef);
+        if (!userDoc.exists()) {
+            throw new Error('User document not found');
+        }
+
+        // Get current tasks
+        const tasks: Task[] = userDoc.data()?.user?.task?.tasks ?? [];
+
+        // Filter out the task to delete
+        const updatedTasks = tasks.filter(task => task.id !== taskId);
+
+        // Update Firestore with new tasks array
+        await updateDoc(userDocRef, {
+            'user.task.tasks': updatedTasks,
+        });
+
+        // Update Redux store
+        store.dispatch(setTasks(updatedTasks));
+    }
+
+
 }
 
 export const authService = new AuthService()
