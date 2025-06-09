@@ -252,21 +252,10 @@ const DashboardOverview: React.FC = () => {
                                     overflow: 'hidden',
                                 }}
                             >
-                                {/* <div
-                                    style={{
-                                        width: `${task.progress}%`,
-                                        height: '100%',
-                                        backgroundColor: '#c8e6c9',
-                                        transition: 'width 0.3s ease',
-                                    }}
-                                /> */}
                             </div>
                         </div>
                     ))}
                 </div>
-
-                {/* Calendar remains unchanged */}
-                {/* ... */}
             </div>
         </div>
     );

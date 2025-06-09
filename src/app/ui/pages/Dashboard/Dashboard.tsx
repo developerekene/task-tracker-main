@@ -1,18 +1,23 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../redux/store';
+
 import Section from './Section';
 import DashboardOverview from './DashboardOverview';
 import Settings from './Settings';
 import CalendarView from './CalendarView';
 import UserProfile from './UserProfile';
 import TaskList from './TaskList';
+import Notifications from './Notifications';
+import Navbar from '../../components/Navbar';
+
 import { FaTachometerAlt, FaTasks, FaUser, FaCalendarAlt, FaCog, FaSignOutAlt } from 'react-icons/fa';
 import { authService } from '../../../redux/configuration/auth.service';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../Routes/Index';
-import Notifications from './Notifications';
-
+import { hideSidebar, toggleMobileSidebar } from '../../../redux/slices/sidebar';
 
 const DashboardWrapper = styled.div`
   display: grid;
@@ -20,28 +25,6 @@ const DashboardWrapper = styled.div`
   height: 100vh;
   background-color: #0d0d0d;
   color: #fff;
-`;
-
-const Header = styled.header`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-  background-color: #1a1a1a;
-  border-bottom: 1px solid #333;
-`;
-
-const InitialsBadge = styled.div`
-  background-color: #4a90e2;
-  color: white;
-  border-radius: 50%;
-  padding: 10px;
-  width: 40px;
-  height: 40px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `;
 
 const Main = styled.main`
@@ -52,10 +35,29 @@ const Main = styled.main`
   height: calc(100vh - 60px);
 `;
 
-const Sidebar = styled.div`
+const Sidebar = styled.div<{ showMobileSidebar: boolean }>`
   background-color: #111;
   border-right: 1px solid #222;
   padding: 20px;
+  transition: transform 0.3s ease;
+  z-index: 100;
+  height: 100%;
+  overflow-y: auto;
+
+  @media (max-width: 768px) {
+    position: absolute;
+    width: 250px;
+    left: 0;
+    top: 60px;
+    transform: ${({ showMobileSidebar }) =>
+    showMobileSidebar ? 'translateX(0)' : 'translateX(-100%)'};
+    box-shadow: ${({ showMobileSidebar }) =>
+    showMobileSidebar ? '2px 0 5px rgba(0,0,0,0.5)' : 'none'};
+  }
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 `;
 
 const ToggleMenuButton = styled.button`
@@ -76,25 +78,32 @@ const MenuItem = styled.div`
 
 const Content = styled.div`
   padding: 20px;
-  overFlow: auto;
-`;
+  overflow: auto;
+  width: 100%;
 
-const getGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good Morning';
-  if (hour < 18) return 'Good Afternoon';
-  return 'Good Evening';
-};
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  @media (max-width: 768px) {
+    padding: 10px;
+    width: 100vw;
+  }
+`;
 
 const Dashboard: React.FC<{ user: { firstName: string; lastName: string } }> = ({ user }) => {
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [selectedItem, setSelectedItem] = useState('Dashboard');
 
-  const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
-  const navigate = useNavigate()
+  const showMobileSidebar = useSelector((state: RootState) => state.sidebar.showMobileSidebar);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    await authService.handleUserSignout()
+    await authService
+      .handleUserSignout()
       .then(() => navigate(RoutePath.Login))
       .catch((err) => console.error(err));
   };
@@ -118,58 +127,64 @@ const Dashboard: React.FC<{ user: { firstName: string; lastName: string } }> = (
     }
   };
 
-
   return (
     <DashboardWrapper>
-      <Header>
-        <h1 style={{ fontSize: '1.5rem', color: '#4a90e2', margin: 0 }}>Task Mate</h1>
-        <div style={{ display: "flex", justifyContent: "center", gap: 20, alignItems: "center" }}>
-          <p style={{ margin: 0, fontSize: '1rem', color: '#ccc' }}>
-            {getGreeting()}, {user.firstName}
-          </p>
-          <InitialsBadge>{initials}</InitialsBadge>
-        </div>
-      </Header>
-
+      <Navbar />
       <Main isMenuCollapsed={isMenuCollapsed}>
-        <Sidebar style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 60px)' }}>
-          <ToggleMenuButton onClick={() => setIsMenuCollapsed(prev => !prev)}>
-            {isMenuCollapsed ? '▶' : '◀'}
-          </ToggleMenuButton>
+        <Sidebar showMobileSidebar={showMobileSidebar}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <ToggleMenuButton onClick={() => dispatch(toggleMobileSidebar())}>
+              {isMenuCollapsed ? '▶' : '◀'}
+            </ToggleMenuButton>
+
+            {!isMenuCollapsed && (
+              <div style={{ flex: 1 }}>
+                {[
+                  // @ts-ignore
+                  { label: 'Dashboard', icon: <FaTachometerAlt />, key: 'Dashboard' },
+                  // @ts-ignore
+                  { label: 'Profile', icon: <FaUser />, key: 'Profile' },
+                  // @ts-ignore
+                  { label: 'Notifications', icon: <FaUser />, key: 'Notifications' },
+                  // @ts-ignore
+                  { label: 'Tasks', icon: <FaTasks />, key: 'Tasks' },
+                  // @ts-ignore
+                  { label: 'Calendar', icon: <FaCalendarAlt />, key: 'Calendar' },
+                  // @ts-ignore
+                  { label: 'Settings', icon: <FaCog />, key: 'Settings' },
+                ].map((item) => (
+                  <MenuItem
+                    key={item.key}
+                    onClick={() => {
+                      setSelectedItem(item.key);
+                      if (window.innerWidth <= 768) dispatch(hideSidebar());
+                    }}
+                    style={{
+                      color: selectedItem === item.key ? '#4a90e2' : '#fff',
+                      fontWeight: selectedItem === item.key ? 'bold' : 'normal',
+                    }}
+                  >
+                    {React.cloneElement(item.icon, { style: { marginRight: '8px' } })}
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </div>
+            )}
+          </div>
 
           {!isMenuCollapsed && (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              {[
-                // @ts-ignore
-                { label: 'Dashboard', icon: <FaTachometerAlt />, key: 'Dashboard' },
-                // @ts-ignore
-                { label: 'Profile', icon: <FaUser />, key: 'Profile' },
-                // @ts-ignore
-                { label: 'Notifications', icon: <FaUser />, key: 'Notifications' },
-                // @ts-ignore
-                { label: 'Tasks', icon: <FaTasks />, key: 'Tasks' },
-                // @ts-ignore
-                { label: 'Calendar', icon: <FaCalendarAlt />, key: 'Calendar' },
-                // @ts-ignore
-                { label: 'Settings', icon: <FaCog />, key: 'Settings' },
-              ].map(item => (
-                <MenuItem
-                  key={item.key}
-                  onClick={() => setSelectedItem(item.key)}
-                  style={{
-                    color: selectedItem === item.key ? '#4a90e2' : '#fff',
-                    fontWeight: selectedItem === item.key ? 'bold' : 'normal',
-                  }}
-                >
-                  {/* @ts-ignore */}
-                  {React.cloneElement(item.icon, { style: { marginRight: '8px' } })}
-                  {item.label}
-                </MenuItem>
-              ))}
-
+            <div
+              style={{
+                marginBottom: '0px',
+              }}
+            >
               <MenuItem
                 onClick={handleSignOut}
-                style={{ color: '#f44336', marginTop: 'auto' }}
+                style={{
+                  color: '#f44336',
+                  marginBottom: '0px',
+                  marginTop: 'auto',
+                }}
               >
                 {/* @ts-ignore */}
                 <FaSignOutAlt style={{ marginRight: '8px' }} />
@@ -179,9 +194,7 @@ const Dashboard: React.FC<{ user: { firstName: string; lastName: string } }> = (
           )}
         </Sidebar>
 
-        <Content>
-          {renderSelectedComponent()}
-        </Content>
+        <Content>{renderSelectedComponent()}</Content>
       </Main>
     </DashboardWrapper>
   );

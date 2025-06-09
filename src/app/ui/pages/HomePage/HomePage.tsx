@@ -2,6 +2,7 @@ import { motion, useAnimation } from "framer-motion";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Navigate, useNavigate } from "react-router-dom";
+import Navbar from "../../components/Navbar";
 import { RoutePath } from "../../Routes/Index";
 import "./HomePage.css"
 
@@ -122,10 +123,7 @@ const HomePage: React.FC = () => {
     return (
         <div className="droid-landing dark-theme"
         >
-            {/* <Navbar /> */}
-            {/* Hero Section */}
-            <br />
-            <br />
+            <Navbar />
             <motion.section
                 className="hero-section"
                 ref={heroRef}
