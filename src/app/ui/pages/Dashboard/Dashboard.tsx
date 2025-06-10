@@ -116,10 +116,10 @@ const Dashboard: React.FC<{ user: { firstName: string; lastName: string } }> = (
         return <TaskList />;
       case 'Profile':
         return <UserProfile />;
-      case 'Calendar':
-        return <CalendarView />;
-      case 'Notifications':
-        return <Notifications />;
+      // case 'Calendar':
+      //   return <CalendarView />;
+      // case 'Notifications':
+      //   return <Notifications />;
       case 'Settings':
         return <Settings />;
       default:
@@ -145,11 +145,11 @@ const Dashboard: React.FC<{ user: { firstName: string; lastName: string } }> = (
                   // @ts-ignore
                   { label: 'Profile', icon: <FaUser />, key: 'Profile' },
                   // @ts-ignore
-                  { label: 'Notifications', icon: <FaUser />, key: 'Notifications' },
+                  // { label: 'Notifications', icon: <FaUser />, key: 'Notifications' },
                   // @ts-ignore
                   { label: 'Tasks', icon: <FaTasks />, key: 'Tasks' },
                   // @ts-ignore
-                  { label: 'Calendar', icon: <FaCalendarAlt />, key: 'Calendar' },
+                  // { label: 'Calendar', icon: <FaCalendarAlt />, key: 'Calendar' },
                   // @ts-ignore
                   { label: 'Settings', icon: <FaCog />, key: 'Settings' },
                 ].map((item) => (

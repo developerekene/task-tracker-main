@@ -292,6 +292,104 @@ export class AuthService {
         store.dispatch(setTasks(updatedTasks));
     }
 
+    async updatePrimaryInformation(partialUpdateData: Partial<RegisterFormData>) {
+        try {
+            const currentUser = auth.currentUser;
+
+            if (!currentUser) {
+                toast.error("User not authenticated", {
+                    style: { background: '#ff4d4f', color: '#fff' },
+                });
+                return;
+            }
+
+            const userId = currentUser.uid;
+            const userDocRef = doc(db, "database", userId);
+            const userSnapshot = await getDoc(userDocRef);
+
+            if (!userSnapshot.exists()) {
+                toast.error("User not found", {
+                    style: { background: '#ff4d4f', color: '#fff' },
+                });
+                return;
+            }
+
+            const currentData = userSnapshot.data();
+            const updatedPrimaryInfo = {
+                ...currentData.user.primaryInformation,
+                ...partialUpdateData,
+            };
+
+            await updateDoc(userDocRef, {
+                "user.primaryInformation": updatedPrimaryInfo,
+            });
+
+            // ✅ Update Redux state
+            store.dispatch(setUserData(updatedPrimaryInfo));
+
+            toast.success("User information updated successfully", {
+                style: { background: '#4BB543', color: '#fff' },
+            });
+
+        } catch (error: any) {
+            console.error("Failed to update user information:", error.message);
+            toast.error("Failed to update user information", {
+                style: { background: '#ff4d4f', color: '#fff' },
+            });
+        }
+    }
+
+    async updateUserSettings(partialSettingsUpdate: Partial<{}>) {
+        try {
+            const currentUser = auth.currentUser;
+
+            if (!currentUser) {
+                toast.error("User not authenticated", {
+                    style: { background: '#ff4d4f', color: '#fff' },
+                });
+                return;
+            }
+
+            const userId = currentUser.uid;
+            const userDocRef = doc(db, "database", userId);
+            const userSnapshot = await getDoc(userDocRef);
+
+            if (!userSnapshot.exists()) {
+                toast.error("User not found", {
+                    style: { background: '#ff4d4f', color: '#fff' },
+                });
+                return;
+            }
+
+            const currentData = userSnapshot.data();
+
+            // Merge existing settings with the partial update
+            const updatedSettings = {
+                ...currentData.user.settings,
+                ...partialSettingsUpdate,
+            };
+
+            // Update only the settings field in Firestore
+            await updateDoc(userDocRef, {
+                "user.settings": updatedSettings,
+            });
+
+            // Optionally update Redux or app state here if you have a corresponding action
+            // store.dispatch(setUserSettings(updatedSettings));
+
+            toast.success("User settings updated successfully", {
+                style: { background: '#4BB543', color: '#fff' },
+            });
+
+        } catch (error: any) {
+            console.error("Failed to update user settings:", error.message);
+            toast.error("Failed to update user settings", {
+                style: { background: '#ff4d4f', color: '#fff' },
+            });
+        }
+    }
+
+
 
 }
 

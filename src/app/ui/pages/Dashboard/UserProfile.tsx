@@ -10,13 +10,75 @@ import {
     FaCheck,
     FaChartLine,
 } from 'react-icons/fa';
+import { authService } from '../../../redux/configuration/auth.service';
 
 const UserProfile = () => {
     const user = useSelector((state: RootState) => state.user);
     const dispatch = useDispatch();
 
+    const fieldMap: Record<string, keyof typeof user> = {
+        'First Name': 'firstName',
+        'Middle Name': 'middleName',
+        'Last Name': 'lastName',
+        'Phone': 'phone',
+        'Gender': 'gender',
+        'Date Of Birth': 'dateOfBirth',
+        'Country': 'country',
+        'State': 'state',
+        'City': 'city',
+        'StreetName': 'streetName',
+        'StreetNumber': 'streetNumber',
+        'Educational Level': 'educationalLevel',
+        'Referral Name': 'referralName',
+        'Secondary Email': 'secondaryEmail',
+        'Security Question': 'securityQuestion',
+        'Security Answer': 'securityAnswer',
+    };
+
+    const initialFormState = {
+        'First Name': '',
+        'Middle Name': '',
+        'Last Name': '',
+        'Phone': '',
+        'Gender': '',
+        'Date Of Birth': '',
+        'Country': '',
+        'State': '',
+        'City': '',
+        'StreetName': '',
+        'StreetNumber': '',
+        'Educational Level': '',
+        'Referral Name': '',
+        'Secondary Email': '',
+        'Security Question': '',
+        'Security Answer': '',
+    };
+
+    const extractStringFields = (obj: any): Record<string, string> => {
+        const result: Record<string, string> = {};
+        Object.keys(obj).forEach((key) => {
+            const value = obj[key];
+            if (typeof value === 'string') {
+                result[key] = value;
+            } else if (typeof value === 'boolean' || typeof value === 'number') {
+                result[key] = String(value); // Convert boolean or number to string
+            }
+            // Skip if value is object/undefined/etc.
+        });
+        return result;
+    };
+
+
     const [isEditing, setIsEditing] = useState(false);
-    const [editedUser, setEditedUser] = useState(user);
+    const [editedUser, setEditedUser] = useState<Record<string, string>>(
+        Object.entries(fieldMap).reduce((acc, [label, key]) => {
+            const val = user[key];
+            acc[label] = typeof val === 'string' ? val : String(val ?? '');
+            return acc;
+        }, {} as Record<string, string>)
+    );
+
+
 
     const handleEditClick = () => {
         setIsEditing(true);
@@ -69,17 +131,30 @@ const UserProfile = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setEditedUser((prev: any) => ({
+        setEditedUser((prev) => ({
             ...prev,
             [name]: value,
         }));
     };
 
-    const handleSave = () => {
-        // TODO: dispatch updated user to redux or call API
-        console.log('Saved user data:', editedUser);
-        setIsEditing(false);
+    const handleSave = async () => {
+        const updatedUser = Object.entries(fieldMap).reduce((acc, [label, key]) => {
+            acc[key] = editedUser[label];
+            return acc;
+        }, {} as Record<string, string>);
+
+        await authService.updatePrimaryInformation(updatedUser)
+            .then(() => {
+                console.log('Saved user data:', updatedUser);
+                // TODO: Dispatch or send to API
+                setIsEditing(false);
+                setEditedUser(initialFormState)
+            })
+            .catch((err) => {
+                console.log('update err:', err);
+            })
     };
+
 
     return (
         <div
@@ -91,7 +166,6 @@ const UserProfile = () => {
                 flexDirection: 'column',
             }}
         >
-            {/* Floating Edit/Save Button */}
             <div
                 style={{
                     position: 'fixed',
@@ -115,7 +189,6 @@ const UserProfile = () => {
                 {isEditing ? <FaSave color="#fff" size={24} /> : <FaEdit color="#fff" size={24} />}
             </div>
 
-            {/* User Header - Non-editable */}
             <h3 style={{ color: '#fff', marginBottom: '8px', fontSize: '1.5rem' }}>
                 {`${user.firstName} ${user.lastName}`}
             </h3>
@@ -164,10 +237,11 @@ const UserProfile = () => {
                 ))}
             </div>
 
-            {/* Form Fields - Only Shown in Edit Mode */}
             {isEditing && (
                 <>
-                    <p style={{ color: '#bbb', marginBottom: '10px', fontSize: '1rem' }}>Let's update your profile</p>
+                    <p style={{ color: '#bbb', marginBottom: '10px', fontSize: '1rem' }}>
+                        Let's update your profile
+                    </p>
                     <form
                         style={{
                             display: 'grid',
@@ -178,28 +252,16 @@ const UserProfile = () => {
                             padding: '10px',
                         }}
                     >
-                        {[
-                            'FirstName',
-                            'middleName',
-                            'LastName',
-                            'phone',
-                            'gender',
-                            'dateOfBirth',
-                            'country',
-                            'state',
-                            'city',
-                            'streetName',
-                            'streetNumber',
-                            'educationalLevel',
-                            'referralName',
-                            'secondaryEmail',
-                            'securityQuestion',
-                            'securityAnswer',
-                        ].map(field => (
+                        {Object.keys(initialFormState).map((field) => (
                             <div key={field} style={{ color: '#fff' }}>
                                 <label
                                     htmlFor={field}
-                                    style={{ fontSize: '0.85rem', color: '#aaa', display: 'block', marginBottom: '6px' }}
+                                    style={{
+                                        fontSize: '0.85rem',
+                                        color: '#aaa',
+                                        display: 'block',
+                                        marginBottom: '6px',
+                                    }}
                                 >
                                     {field}
                                 </label>
@@ -207,7 +269,7 @@ const UserProfile = () => {
                                     type="text"
                                     name={field}
                                     id={field}
-                                    value={(editedUser as any)[field]}
+                                    value={editedUser[field] || ''}
                                     onChange={handleChange}
                                     style={{
                                         width: '100%',
