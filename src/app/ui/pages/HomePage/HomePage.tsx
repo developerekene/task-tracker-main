@@ -2,6 +2,7 @@ import { motion, useAnimation } from "framer-motion";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Navigate, useNavigate } from "react-router-dom";
+import { ASSETS } from "../../../utils/Assets";
 import Navbar from "../../components/Navbar";
 import { RoutePath } from "../../Routes/Index";
 import "./HomePage.css"
@@ -134,8 +135,8 @@ const HomePage: React.FC = () => {
                 <div className="container">
                     <div className="hero-grid">
                         <motion.div className="hero-content" variants={heroVariants}>
-                            <motion.h1 variants={heroItemVariants}>
-                                Task Tracker
+                            <motion.h1 style={{ color: "#4a90e2" }} variants={heroItemVariants}>
+                                {ASSETS.text.name}
                             </motion.h1>
                             <motion.h3 style={{ color: "grey", marginBottom: 20 }} variants={heroItemVariants}>
                                 Be confident while you are on the Go.
@@ -144,7 +145,7 @@ const HomePage: React.FC = () => {
                                 A Smart, Intuitive Task Tracker Built with React and Firebase for Seamless Task Management, Real-Time Sync, User Authentication, and Productivity Insights
                             </motion.p>
                             <motion.div className="hero-cta" variants={heroItemVariants}>
-                                <button onClick={() => navigate(RoutePath.Register)} className="cta-primary">Join for Free</button>
+                                <button style={{ backgroundColor: "#4a90e2" }} onClick={() => navigate(RoutePath.Register)} className="cta-primary">Join for Free</button>
                                 {/* <button style={{ color: "white" }} className="cta-secondary">Learn More</button> */}
                             </motion.div>
                             {/* <motion.div className="hero-tagline" variants={heroItemVariants}>
@@ -157,8 +158,8 @@ const HomePage: React.FC = () => {
                             animate="float"
                         >
                             <img
-                                // src={Assets.images.phone_One}
-                                alt="D'roid Companion"
+                                src={ASSETS.images.bannerImage}
+                                alt={ASSETS.text.shortName}
                                 className="phone-img"
                             />
                             <div className="phone-glow"></div>
@@ -239,26 +240,23 @@ const HomePage: React.FC = () => {
                         <motion.div className="review-card" variants={reviewCardVariants}>
                             <div className="review-rating">★★★★★</div>
                             <p className="review-text">
-                                "The D'roid Mobile has completely changed how I work and play.
-                                The battery life is insane!"
+                                "This app helped me finally stay consistent with my daily goals. I love how simple and clean the interface is"
                             </p>
-                            <div className="review-author">- Sarah J., Tech Blogger</div>
+                            <div style={{ color: "#4a90e2" }} className="review-author">- Sarah Mensah</div>
                         </motion.div>
                         <motion.div className="review-card" variants={reviewCardVariants}>
                             <div className="review-rating">★★★★☆</div>
                             <p className="review-text">
-                                "Camera quality is unmatched. The night mode shots look like
-                                they were taken in daylight."
+                                "I used to forget deadlines all the time. Since using this tracker, my productivity has doubled."
                             </p>
-                            <div className="review-author">- Michael T., Photographer</div>
+                            <div style={{ color: "#4a90e2" }} className="review-author">- Chinedu Okafor</div>
                         </motion.div>
                         <motion.div className="review-card" variants={reviewCardVariants}>
                             <div className="review-rating">★★★★★</div>
                             <p className="review-text">
-                                "Performance is buttery smooth. Games and apps load instantly
-                                with no lag whatsoever."
+                                "The reminder notifications are a lifesaver. It's like having a personal assistant in my pocket."
                             </p>
-                            <div className="review-author">- David L., Mobile Gamer</div>
+                            <div style={{ color: "#4a90e2" }} className="review-author">- Aisha Bello</div>
                         </motion.div>
                     </motion.div>
                 </div>
