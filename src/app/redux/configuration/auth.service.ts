@@ -6,6 +6,7 @@ import { RegisterFormData } from "../../utils/Types";
 import { setTasks, Task } from "../slices/task";
 import { resetUserData, setUserData } from "../slices/user";
 import { store } from "../store";
+import axios from 'axios';
 
 const getCurrentDateTime = () => {
     const now = new Date();
@@ -94,9 +95,11 @@ export class AuthService {
 
         if (userSnapshot.exists()) {
             const fetchedUserData = userSnapshot.data();
-            const primaryInformation = fetchedUserData.user.primaryInformation;
+            const primaryInformation = fetchedUserData?.user?.primaryInformation;
+            const taskInformation = fetchedUserData?.user?.task?.tasks;
 
             store.dispatch(setUserData(primaryInformation));
+            store.dispatch(setTasks(taskInformation));
 
             // ✅ Send email only after DB is confirmed written
             await sendEmailVerification(user);
@@ -112,6 +115,91 @@ export class AuthService {
 
         return registerUser
     }
+
+    // async handleUserRegistration(userData: RegisterFormData) {
+    //     const registerUser = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+    //     const user = registerUser.user;
+    //     const currentDateTime = getCurrentDateTime();
+
+    //     await updateProfile(user, {
+    //         displayName: `${userData.firstName} ${userData.lastName}`,
+    //     });
+
+    //     const userDocRef = doc(collection(db, "database"), user.uid);
+
+    //     const database = {
+    //         user: {
+    //             primaryInformation: {
+    //                 firstName: userData.firstName,
+    //                 lastName: userData.lastName,
+    //                 initials: `${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase(),
+    //                 uniqueId: user.uid,
+    //                 email: userData.email,
+    //                 isLoggedIn: true,
+    //                 agreedToTerms: true,
+    //                 middleName: "",
+    //                 phone: "",
+    //                 gender: "",
+    //                 dateOfBirth: "",
+    //                 disability: false,
+    //                 disabilityType: "",
+    //                 photoUrl: "",
+    //                 educationalLevel: "",
+    //                 referralName: "",
+    //                 secondaryEmail: "",
+    //                 securityQuestion: "",
+    //                 securityAnswer: "",
+    //                 verifiedEmail: false,
+    //                 verifyPhoneNumber: false,
+    //                 twoFactorSettings: false,
+    //                 streetNumber: "",
+    //                 streetName: "",
+    //                 city: "",
+    //                 state: "",
+    //                 country: ""
+    //             },
+    //             location: {
+    //                 currentdateTime: currentDateTime,
+    //             },
+    //             task: {
+    //                 tasks: []
+    //             },
+    //             notification: {
+    //                 notifications: []
+    //             },
+    //             settings: {
+    //                 language: ""
+    //             }
+    //         },
+    //     };
+
+    //     try {
+    //         // Send to Python encryption service
+    //         const response = await axios.post('http://localhost:5000/encrypt', database);
+    //         const encryptedData = response.data.encrypted;
+
+    //         // Store encrypted string instead of plain object
+    //         await setDoc(userDocRef, { encrypted: encryptedData });
+
+    //         const userSnapshot = await getDoc(userDocRef);
+
+    //         if (userSnapshot.exists()) {
+    //             await sendEmailVerification(user);
+    //             toast.success(`Your Account has been successfully created`, {
+    //                 style: { background: '#4BB543', color: '#fff' },
+    //             });
+    //         } else {
+    //             toast.error('User Information does not exist 🚫', {
+    //                 style: { background: '#ff4d4f', color: '#fff' },
+    //             });
+    //         }
+    //     } catch (error) {
+    //         toast.error("Encryption or registration failed");
+    //         console.error("Error:", error);
+    //     }
+
+    //     return registerUser;
+    // }
 
     async handleUserLogin(email: string, password: string) {
         try {
@@ -237,7 +325,6 @@ export class AuthService {
         // Dispatch to Redux store to update task slice
         store.dispatch(setTasks(updatedTasks));
     }
-
 
     async handleUpdateTask(userId: string, taskId: string, updates: Partial<Task>) {
         const userDocRef = doc(db, 'database', userId);
